@@ -12,6 +12,9 @@
 *.mk
 /Release/
 makefile
+!/Release/
+*.hex
 /.settings/
 .cproject
 .project
+/Release/
