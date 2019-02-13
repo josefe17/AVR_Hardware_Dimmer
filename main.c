@@ -5,13 +5,41 @@
  *      Author: josefe
  */
 
-//#include <avr/io.h>
+#define F_CPU 20000000UL
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include "dimmer.h"
+
+
+
+ISR(TIMER1_OVF_vect)
+{
+	freqMeasuringOverflowISR();
+}
+
+
+ISR(TIMER1_CAPT_vect)
+{
+	zeroCrossingISR();
+}
 
 int main (void)
 {
-	char i=0;
+	DDRB|=(1<<2);
+	PORTB&=~(1<<2);
+	dimmer_init();
+	sei();
+	setFiringAngle(150);
+
 	while(1)
 	{
-		i-=5;
+		setFiringAngle(15000);
+		_delay_ms(500);
+		setFiringAngle(5000);
+		_delay_ms(500);
 	}
+
+
 }
