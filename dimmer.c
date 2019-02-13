@@ -73,7 +73,7 @@ void zeroCrossingISR(void)
 			//TODO
 			//Verify whether the interrupt can trip itsel if timer is resetted
 			dimmer_status=DIMMER_FREQ_LOADED; //Next rising is a valid zero crossing
-			PORTB&=~(1<<2);
+			//PORTB&=~(1<<2);
 			break;
 		case DIMMER_ZC:      //Valid zero crossing
 		case DIMMER_FREQ_LOADED: //Rising has happened
@@ -84,7 +84,7 @@ void zeroCrossingISR(void)
 			firing_timer_update_period(firingAngle); //update firing angle
 			//firing_timer_reset();
 			dimmer_status=DIMMER_FIRING; //Next falling is firing!!
-			PORTB|=(1<<2);
+			//PORTB|=(1<<2);
 			break;
 		case DIMMER_FIRING: //Falling has happened, firing begins
 			zeroCrossingSetEdgeDirection(zeroCrossingRisingEdge); //Wait for rising and zero crossing
@@ -93,7 +93,7 @@ void zeroCrossingISR(void)
 			firing_timer_enable(); //Reset and start firing timer
 			freqMeasuringOverflowInit(); //Measure again
 			dimmer_status=DIMMER_ZC; //wait for ZC
-			PORTB&=~(1<<2);
+			//PORTB&=~(1<<2);
 			break;
 		default:
 		case DIMMER_IDLE: //First rising edge has happened
@@ -101,7 +101,7 @@ void zeroCrossingISR(void)
 			zeroCrossingSetEdgeDirection(zeroCrossingFallingEdge); //Wait for falling
 			firing_timer_update_period(0xFFFF);        //No firing and sets compare register to top value
 			dimmer_status=DIMMER_START_FREQ_MEASURING; //Next falling start measuring
-			PORTB|=(1<<2);
+			//PORTB|=(1<<2);
 			break;
 	}
 }
@@ -109,7 +109,7 @@ void zeroCrossingISR(void)
 
 void freqMeasuringOverflowISR(void)
 {
-	PORTB|=(1<<2);
+	//PORTB|=(1<<2);
 	freqMeasuringOverflowDisable();
 	zeroCrossingSetEdgeDirection(zeroCrossingRisingEdge); //Wait for rising
 	turn_channel_off();

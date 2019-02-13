@@ -27,8 +27,8 @@ ISR(TIMER1_CAPT_vect)
 
 int main (void)
 {
-	DDRB|=(1<<2);
-	PORTB&=~(1<<2);
+	//DDRB|=(1<<2);
+	//PORTB&=~(1<<2);
 	dimmer_init();
 	sei();
 	setFiringAngle(150);
