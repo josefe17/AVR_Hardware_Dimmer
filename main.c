@@ -12,6 +12,7 @@
 #include <util/delay.h>
 #include "dimmer.h"
 
+//Using fuses lfuse:0xf7 hfuse:0xdf efuse:0x07
 
 
 ISR(TIMER1_OVF_vect)
