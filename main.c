@@ -58,7 +58,8 @@ int main (void)
 	{
 
 		//setDimmingValue(ReadADC(0));
-		setVoltageRMS(ReadADC(0));
+		setVoltageRMS(ReadADC(0), 1);
+		setVoltageRMS(MAINS_VOLTAGE-ReadADC(0), 2);
 		_delay_ms(30);
 		//_delay_ms(5000);
 	}

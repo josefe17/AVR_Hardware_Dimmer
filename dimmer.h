@@ -19,8 +19,8 @@ unsigned int firingMap[] =   {255, 238, 232, 227, 224, 221, 218, 216, 214, 212, 
 
 #define MAINS_VOLTAGE 230UL
 
-void setDimmingValue (unsigned char dimmingValue);
-void setVoltageRMS (unsigned char volts);
+void setDimmingValue (unsigned char dimmingValue, unsigned char channel);
+void setVoltageRMS (unsigned char volts, unsigned char channel);
 volatile unsigned int getRawFrequency(void);
 
 void dimmer_init (void);

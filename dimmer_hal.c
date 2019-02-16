@@ -26,16 +26,18 @@ void firing_timer_init(void)
 {
 	TCNT1H=0; //Clear count??
 	TCNT1L=0;
-	TCCR1A=(1<<COM1A1); //Clear on compare
+	TCCR1A=(1<<COM1A1)|(1<<COM1B1); //Clear on compare
 	TCCR1B|= (firing_timer_prescaler_mask & firing_timer_prescaler); // Timer already running
-	TCCR1C=(1<<FOC1A); //ensure pin is off
-	TCCR1A|=(1<<COM1A0); //reconfigure to set on compare
+	TCCR1C=(1<<FOC1A)|(1<<FOC1B); //ensure pins are off
+	TCCR1A|=((1<<COM1A0)|(1<<COM1B0)); //reconfigure to set on compare
 
 }
 
 /* GPIO functions */
 void channel_init (void)
 {
-	outputChannelTris|=(1<<outputChannelPin_bit); //Set output mode
-	outputChannelPort&=~(1<<outputChannelPin_bit);//Write 0 to output
+	outputChannel1Tris|=(1<<outputChannel1Pin_bit); //Set output mode
+	outputChannel1Port&=~(1<<outputChannel1Pin_bit);//Write 0 to output
+	outputChannel2Tris|=(1<<outputChannel2Pin_bit); //Set output mode
+	outputChannel2Port&=~(1<<outputChannel2Pin_bit);//Write 0 to output
 }

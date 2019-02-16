@@ -25,27 +25,45 @@ typedef enum
 }states;
 
 volatile unsigned int rawPeriod;
-volatile unsigned int firingAngle;
+volatile unsigned int firingAngle1;
+volatile unsigned int firingAngle2;
 volatile unsigned int i =0;
 states dimmer_status;
 
-void setDimmingValue (unsigned char dimmingValue)
+void setDimmingValue (unsigned char dimmingValue, unsigned char channel)
 {
+	//TODO
+	//Header
 
+	volatile unsigned int firingAngleBuffer;
 	uint32_t rawFiring = (uint32_t) pgm_read_word(&(SCurveFiringTable[dimmingValue]));
 	uint32_t product = (uint32_t) rawPeriod * rawFiring;
-	firingAngle = (volatile unsigned int) (product>>16);
+	firingAngleBuffer = (volatile unsigned int) (product>>16);
 
 	//firingAngle=dimmingValue*256;
 
-	if (firingAngle==0) //This avoids not triggering when setting to zero because it's the timer reset value
+	if (firingAngleBuffer==0) //This avoids not triggering when setting to zero because it's the timer reset value
 	{
-		firingAngle=1; //Timer doesnt't trigger compare during its writing cycle and we do write it to 0 to reset it
+		firingAngleBuffer=1; //Timer doesnt't trigger compare during its writing cycle and we do write it to 0 to reset it
 	}
+
+	switch (channel)
+	{
+		case channel1:
+			firingAngle1=firingAngleBuffer;
+			return;
+		case channel2:
+			firingAngle2=firingAngleBuffer;
+			return;
+		default:
+			return;
+	}
+
+	return;
 }
 
 
-void setVoltageRMS (unsigned char volts)
+void setVoltageRMS (unsigned char volts, unsigned char channel)
 {
 
 //	volatile unsigned long rawFiring = pgm_read_word(&(linearCurveFiringTable[volts]));
@@ -67,7 +85,7 @@ void setVoltageRMS (unsigned char volts)
 	 uint32_t product = (uint32_t) volts * volts;
 	 uint32_t divider =  ((uint32_t) (uint32_t) MAINS_VOLTAGE * (uint32_t) MAINS_VOLTAGE);
 	 unsigned char cocient = (volatile unsigned char) ((product*255) / divider);
-	 setDimmingValue(cocient);
+	 setDimmingValue(cocient, channel);
 
 }
 
@@ -79,7 +97,8 @@ volatile unsigned int getRawFrequency(void)
 void dimmer_init (void)
 {
 	rawPeriod=0xFFFF;
-    firingAngle=0xFFFF;
+    firingAngle1=0xFFFF;
+    firingAngle2=0xFFFF;
     dimmer_status=DIMMER_IDLE;
     channel_init();
     zeroCrossingInit(); //Here zero crossing interrupts start to be enabled
@@ -95,11 +114,10 @@ void zeroCrossingISR(void)
 		case DIMMER_START_FREQ_MEASURING: //Falling edge has happened
 			zeroCrossingSetEdgeDirection(zeroCrossingRisingEdge); //Wait for rising
 			turn_channel_off();
-			firing_timer_update_period(0xFFFF); //Ensures nothing fires
+			firing_timer_update_period(0xFFFF, channel1); //Ensures nothing fires
+			firing_timer_update_period(0xFFFF, channel2);
 			firing_timer_reset(); //Sets count to 0
 			freqMeasuringOverflowInit();   //Start first measuring
-			//TODO
-			//Verify whether the interrupt can trip itsel if timer is resetted
 			dimmer_status=DIMMER_FREQ_LOADED; //Next rising is a valid zero crossing
 			//PORTB&=~(1<<2);
 			break;
@@ -109,14 +127,16 @@ void zeroCrossingISR(void)
 			zeroCrossingSetEdgeDirection(zeroCrossingFallingEdge);   //Wait for falling (and re-start firing)
 			//firing_timer_disable(); //Stop firing and turs channel off
 			rawPeriod=freqMeasuringTimerRead(); //Holds measured frequency
-			firing_timer_update_period(firingAngle); //update firing angle
+			//firing_timer_update_period(firingAngle1, channel1); //update firing angle
+			//firing_timer_update_period(firingAngle2, channel2);
 			//firing_timer_reset();
 			dimmer_status=DIMMER_FIRING; //Next falling is firing!!
 			//PORTB|=(1<<2);
 			break;
 		case DIMMER_FIRING: //Falling has happened, firing begins
 			zeroCrossingSetEdgeDirection(zeroCrossingRisingEdge); //Wait for rising and zero crossing
-			firing_timer_update_period(firingAngle); //update firing angle
+			firing_timer_update_period(firingAngle1, channel1); //update firing angle
+			firing_timer_update_period(firingAngle2, channel2);
 			firing_timer_reset();
 			firing_timer_enable(); //Reset and start firing timer
 			freqMeasuringOverflowInit(); //Measure again
@@ -127,7 +147,8 @@ void zeroCrossingISR(void)
 		case DIMMER_IDLE: //First rising edge has happened
 			turn_channel_off(); //Output is off
 			zeroCrossingSetEdgeDirection(zeroCrossingFallingEdge); //Wait for falling
-			firing_timer_update_period(0xFFFF);        //No firing and sets compare register to top value
+			firing_timer_update_period(0xFFFF, channel1);        //No firing and sets compare register to top value
+			firing_timer_update_period(0xFFFF, channel2);
 			dimmer_status=DIMMER_START_FREQ_MEASURING; //Next falling start measuring
 			//PORTB|=(1<<2);
 			break;

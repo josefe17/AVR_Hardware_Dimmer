@@ -49,10 +49,17 @@
 #define zeroCrossingRisingEdge 					1
 #define zeroCrossingFallingEdge 				0
 
+#define channel1 1
+#define channel2 2
 
-#define outputChannelPort 		PORTB
-#define outputChannelTris		DDRB
-#define outputChannelPin_bit	1
+
+#define outputChannel1Port 		PORTB
+#define outputChannel1Tris		DDRB
+#define outputChannel1Pin_bit	1
+
+#define outputChannel2Port 		PORTB
+#define outputChannel2Tris		DDRB
+#define outputChannel2Pin_bit	2
 
 /*HAL functions*/
 void zeroCrossingInit(void);
@@ -66,7 +73,7 @@ inline void firing_timer_disable(void);
 inline void firing_timer_reset(void);
 inline char firing_timer_check_flag(void);
 inline void firing_timer_clear_flag(void);
-inline void firing_timer_update_period(unsigned int period);
+inline void firing_timer_update_period(unsigned int period, unsigned char channel);
 
 inline void freqMeasuringOverflowInit(void);
 inline unsigned int freqMeasuringTimerRead(void);
@@ -104,7 +111,7 @@ inline void zeroCrossingSetEdgeDirection(char direction)
 /* Firing timer inline functions*/
 inline void firing_timer_enable(void)
 {
-	TCCR1A=(1<<COM1A1)|(1<<COM1A0); //Set on compare
+	TCCR1A=(1<<COM1A1)|(1<<COM1A0)|(1<<COM1B1)|(1<<COM1B0); //Set on compare
 }
 
 //DEPRECATED
@@ -121,9 +128,20 @@ inline void firing_timer_reset(void)
 	TCNT1L=0;
 }
 
-inline void firing_timer_update_period(unsigned int period)
+inline void firing_timer_update_period(unsigned int period, unsigned char channel)
 {
-    OCR1A=period;
+	switch (channel)
+	{
+	case channel1:
+		OCR1A=period;
+		return;
+	case channel2:
+		OCR1B=period;
+		return;
+	default:
+		return;
+	}
+	return;
 }
 
 //Not used
@@ -171,8 +189,8 @@ inline unsigned int freqMeasuringTimerRead(void)
 /* GPIO inline functions */
 inline void turn_channel_off(void)
 {
-	TCCR1A=(1<<COM1A1); //Clear on compare
-	TCCR1C=(1<<FOC1A); //ensure pin is off
+	TCCR1A=(1<<COM1A1)|(1<<COM1B1); //Clear on compare
+	TCCR1C=(1<<FOC1A)|(1<<FOC1B); //ensure pins are off
 }
 
 
