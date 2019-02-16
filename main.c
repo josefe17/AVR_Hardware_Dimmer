@@ -57,7 +57,8 @@ int main (void)
 	while(1)
 	{
 
-		setDimmingValue(ReadADC(0));
+		//setDimmingValue(ReadADC(0));
+		setVoltageRMS(ReadADC(0));
 		_delay_ms(30);
 		//_delay_ms(5000);
 	}

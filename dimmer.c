@@ -31,9 +31,9 @@ states dimmer_status;
 void setDimmingValue (unsigned char dimmingValue)
 {
 
-	volatile unsigned long rawFiring = pgm_read_word(&(ScurveFiringTable[dimmingValue]));
+	volatile unsigned long rawFiring = pgm_read_word(&(SCurveFiringTable[dimmingValue]));
 	volatile unsigned long product = rawPeriod * rawFiring;
-	firingAngle = (unsigned int) (product>>16);
+	firingAngle = (volatile unsigned int) (product>>16);
 
 	//firingAngle=dimmingValue*256;
 
@@ -46,9 +46,9 @@ void setDimmingValue (unsigned char dimmingValue)
 
 void setVoltageRMS (unsigned char volts)
 {
-	volatile unsigned long rawFiring = pgm_read_word(&(LinearCurveFiringTable[volts]));
+	volatile unsigned long rawFiring = pgm_read_word(&(linearCurveFiringTable[volts]));
 	volatile unsigned long product = rawPeriod * rawFiring;
-	firingAngle = (unsigned int) (product>>16);
+	firingAngle = (volatile unsigned int) (product>>16);
 
 	//firingAngle=dimmingValue*256;
 
